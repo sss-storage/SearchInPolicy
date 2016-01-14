@@ -1,2 +1,2 @@
 # SearchInPolicy
-A policy that shows how to search the directory and parse the results
+An IDM policy snippet that shows how to search the directory and parse the results.
