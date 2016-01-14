@@ -1,0 +1,63 @@
+Using "search" to query for an object whose attribute matches a particular value.
+Then parse through the results.
+This uses the query processor automatically passed into the IDM policy.
+
+<rule>
+	<description>Derive EPIC templateCN</description>
+	<conditions/>
+	<actions>
+		<do-set-local-variable name="wbhTemplateValue">
+			<arg-string>
+				<token-local-variable name="division"/>
+				<token-text xml:space="preserve">||</token-text>
+				<token-local-variable name="department"/>
+				<token-text xml:space="preserve">##</token-text>
+				<token-local-variable name="title"/>
+			</arg-string>
+		</do-set-local-variable>
+		<do-set-local-variable name="templateQueryResult">
+			<arg-node-set>
+				<token-xpath expression="query:search($srcQueryProcessor,'subtree','','~WBHTEMPLATE_CONTAINER~','User','wbhUserDivDeptTitle',$wbhTemplateValue,'')"/>
+			</arg-node-set>
+		</do-set-local-variable>
+		<do-set-local-variable name="allTemplateCNs">
+			<arg-string>
+				<token-text xml:space="preserve">~</token-text>
+			</arg-string>
+		</do-set-local-variable>
+		<do-for-each>
+			<arg-node-set>
+				<token-local-variable name="templateQueryResult"/>
+			</arg-node-set>
+			<arg-actions>
+				<do-set-local-variable name="thisInstance">
+					<arg-node-set>
+						<token-local-variable name="current-node"/>
+					</arg-node-set>
+				</do-set-local-variable>
+				<do-set-local-variable name="templateCN">
+					<arg-string>
+						<token-parse-dn length="1" src-dn-format="slash" start="-1">
+							<token-xpath expression="$thisInstance//@src-dn"/>
+						</token-parse-dn>
+					</arg-string>
+				</do-set-local-variable>
+				<do-set-local-variable name="allTemplateCNs">
+					<arg-string>
+						<token-local-variable name="allTemplateCNs"/>
+						<token-local-variable name="templateCN"/>
+						<token-text xml:space="preserve">~</token-text>
+					</arg-string>
+				</do-set-local-variable>
+			</arg-actions>
+		</do-for-each>
+		<do-trace-message>
+			<arg-string>
+				<token-text xml:space="preserve">templateCN=</token-text>
+				<token-local-variable name="templateCN"/>
+				<token-text xml:space="preserve">  allTemplateCNs=</token-text>
+				<token-local-variable name="allTemplateCNs"/>
+			</arg-string>
+		</do-trace-message>
+	</actions>
+</rule>
